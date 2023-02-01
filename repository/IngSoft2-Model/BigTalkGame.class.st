@@ -12,7 +12,8 @@ Class {
 		'activeCards',
 		'lastCardUsed',
 		'lastEffect',
-		'deck'
+		'deck',
+		'playersInJail'
 	],
 	#category : #'IngSoft2-Model'
 }
@@ -104,6 +105,12 @@ BigTalkGame >> applyGrabCardTo: aPlayer [
 ]
 
 { #category : #'effect-application' }
+BigTalkGame >> applyJailTo: aPlayer [
+
+	playersInJail add: aPlayer 
+]
+
+{ #category : #'effect-application' }
 BigTalkGame >> applyLastCardTo: target [
 
 	lastCardUsed applyOn: self to: target
@@ -138,6 +145,15 @@ BigTalkGame >> applyWormHoleTo: aPlayer [
 BigTalkGame >> assertGameIsNotFinished [
 
 	self hasFinished ifTrue: [ Error signal: 'The game has finished' ]
+]
+
+{ #category : #'private - validations' }
+BigTalkGame >> assertPlayerIsNotInJail: aPlayer [
+
+	( self isInJail: aPlayer )   ifTrue: [ Error signal: 'The player is in jail' ]
+	
+	
+
 ]
 
 { #category : #'playing - card usage' }
@@ -199,7 +215,18 @@ BigTalkGame >> initializeWithPlayers: somePlayers withDice: someDice withBoard: 
 	scoreboard update: board playerPositions.
 	turn := SharedQueue new.
 	turn nextPutAll: players.
-	currentPlayer := turn next
+	currentPlayer := turn next.
+	playersInJail := OrderedCollection new.
+]
+
+{ #category : #private }
+BigTalkGame >> isInJail: aPlayer [
+
+	^ (playersInJail includes: aPlayer)
+
+
+ 
+
 ]
 
 { #category : #'accessing - leader' }
@@ -224,6 +251,7 @@ BigTalkGame >> leaderPosition [
 BigTalkGame >> moveCurrentPlayer [
 
 	self assertGameIsNotFinished.
+	self assertPlayerIsNotInJail: self currentTurnPlayer. 
 	self playerMoveAfterRoll: self currentTurnPlayer.
 	lastEffect := self applyCurrentEffect.
 	self changeTurn.

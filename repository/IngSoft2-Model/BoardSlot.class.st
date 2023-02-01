@@ -20,6 +20,12 @@ BoardSlot class >> withGrabCard [
 ]
 
 { #category : #'instance creation' }
+BoardSlot class >> withJail [
+
+	^ self new initializeWith: Jail new
+]
+
+{ #category : #'instance creation' }
 BoardSlot class >> withMoonwalkWithTwoStepsBack [
 
 	^ self new initializeWith: (Moonwalk withStepsBack: 2)

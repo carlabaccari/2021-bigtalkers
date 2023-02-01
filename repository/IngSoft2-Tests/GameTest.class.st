@@ -409,6 +409,35 @@ GameTest >> testGamePlayerOneFallsInAtomicBomb [
 ]
 
 { #category : #tests }
+GameTest >> testGamePlayerOneFallsInJail [
+
+	| aDie aDice aBoard aGame slots |
+	aDie := LoadedDie rolling: 3.
+	aDice := Dice with: {aDie}.
+	slots := {BoardSlot withNoEffect.
+	BoardSlot withNoEffect.
+	BoardSlot withJail.
+	BoardSlot withNoEffect}.
+	aBoard := Board withAll: slots.
+	aGame := BigTalkGame
+		playedBy:
+			{player1.
+			player2}
+		usingDice: aDice
+		playedOn: aBoard
+		finishingAtLap: 3.
+	aGame moveCurrentPlayer. "se mueve el primer jugador al casillero tres"
+	aGame moveCurrentPlayer. "Se mueve el segundo jugador al casillero tres"
+		
+	self
+		should: [ aGame  moveCurrentPlayer.]
+		raise: Error
+		withMessage: 'The player is in jail'
+
+
+]
+
+{ #category : #tests }
 GameTest >> testGamePlayerOneFallsInMoonWalk [
 
 	| aDie aDice aBoard aGame slots |
