@@ -247,6 +247,12 @@ BigTalkGame >> leaderPosition [
 	^ scoreboard leaderPosition
 ]
 
+{ #category : #'playing - card usage' }
+BigTalkGame >> libertyCardUsedBy: aPlayer targetting: target [
+
+self player: aPlayer usesCard: Liberty new  on: target.
+]
+
 { #category : #playing }
 BigTalkGame >> moveCurrentPlayer [
 
@@ -326,6 +332,12 @@ self player: aPlayer usesCard: Redo new  on: target.
 BigTalkGame >> removeActiveCard: aCard from: target [
 
 	activeCards remove: aCard from: target
+]
+
+{ #category : #'effect-application' }
+BigTalkGame >> removeFromJail: aPlayer [
+
+	playersInJail remove: aPlayer 
 ]
 
 { #category : #'playing - card usage' }

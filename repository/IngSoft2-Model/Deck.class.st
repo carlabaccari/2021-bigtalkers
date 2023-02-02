@@ -33,6 +33,12 @@ Deck class >> onlyCancellationCards [
 ]
 
 { #category : #'instance creation' }
+Deck class >> onlyLibertyCards [
+
+	^ self new initializeWith: {Liberty new}
+]
+
+{ #category : #'instance creation' }
 Deck class >> onlyOverloadCards [
 
 	^ self new initializeWith: {Overload new}

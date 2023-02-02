@@ -13,6 +13,6 @@ Liberty >> applyOn: aGame to: aPlayer [
 { #category : #'private - validations' }
 Liberty >> playableBy: aPlayer on: aGame affecting: target [
 	
-	[ aGame isInJail: aPlayer ] ifFalse: [ Error signal: 'Cant use card if player is not in jail' ]
+	( aGame isInJail: aPlayer ) ifFalse: [ Error signal: 'Cant use card if player is not in jail' ]
 	
 ]

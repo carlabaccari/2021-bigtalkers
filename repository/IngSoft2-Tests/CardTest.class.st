@@ -16,7 +16,9 @@ Class {
 		'accelerationCard',
 		'repeatCard',
 		'redoCard',
-		'cancellationCard'
+		'cancellationCard',
+		'libertyDeck',
+		'libertyCard'
 	],
 	#category : #'IngSoft2-Tests'
 }
@@ -33,12 +35,14 @@ CardTest >> setUp [
 	repeatDeck := Deck onlyRepeatCards.
 	accelerationDeck := Deck onlyAccelerationCards.
 	cancellationDeck := Deck onlyCancellationCards.
+	libertyDeck := Deck onlyLibertyCards.
 	speedCard := Speed new.
 	overloadCard := Overload new.
 	accelerationCard := Acceleration new.
 	repeatCard := Repeat new.
 	redoCard := Redo new.
-	cancellationCard := Cancellation new
+	cancellationCard := Cancellation new.
+	libertyCard := Liberty new.
 ]
 
 { #category : #asserting }
@@ -95,6 +99,43 @@ CardTest >> testAGameWithACancellationAndNoActiveCards [
 	aGame moveCurrentPlayer.
 	aLeader := aGame leaderPosition.
 	self assert: aLeader equals: 4
+]
+
+{ #category : #tests }
+CardTest >> testAGameWithALibertyCardThatFallsInJail [
+
+	| aGame aDie aBoard aDice  someSlots |
+	player1 drawCardFrom: libertyDeck.
+	aDie := LoadedDie rolling: 3.
+	aDice := Dice with: {aDie}.
+	someSlots := {BoardSlot withNoEffect.
+	BoardSlot withNoEffect.
+	BoardSlot withJail.
+	BoardSlot withNoEffect.
+	BoardSlot withNoEffect.
+	BoardSlot withNoEffect.
+	BoardSlot withNoEffect.
+	}.
+	aBoard := Board withAll: someSlots.
+	aGame := BigTalkGame
+		playedBy:
+			{player1.
+			player2}
+		usingDice: aDice
+		playedOn: aBoard
+		finishingAtLap: 2.
+	aGame moveCurrentPlayer.
+	aGame moveCurrentPlayer.
+	aGame libertyCardUsedBy: player1 targetting: player1.
+	aGame moveCurrentPlayer.
+	self assert: (aGame currentSlotOf: player1) equals: 6. "el jugador 1 usa la carta libertad y sale de la carcel"
+	self
+		should: [ aGame  moveCurrentPlayer.]
+		raise: Error
+		withMessage: 'The player is in jail'
+
+	
+
 ]
 
 { #category : #tests }
