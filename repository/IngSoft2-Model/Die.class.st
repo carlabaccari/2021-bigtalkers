@@ -38,3 +38,9 @@ Die >> roll [
 
 	^ (1 to: sides) atRandom
 ]
+
+{ #category : #rolling }
+Die >> sides [
+
+	^ sides 
+]

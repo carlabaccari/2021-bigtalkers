@@ -39,3 +39,9 @@ LoadedDie >> roll [
 
 	^ rollValue
 ]
+
+{ #category : #rolling }
+LoadedDie >> sides [
+
+	^ rollValue
+]

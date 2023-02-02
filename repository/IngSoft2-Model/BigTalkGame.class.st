@@ -147,6 +147,15 @@ BigTalkGame >> assertGameIsNotFinished [
 	self hasFinished ifTrue: [ Error signal: 'The game has finished' ]
 ]
 
+{ #category : #'playing - card usage' }
+BigTalkGame >> assertPlayerGotTheHighestScore: someDice [
+
+	| highestScore rollvalue |
+	highestScore := someDice sum: [ :die | die sides ].
+	rollvalue := dice roll.
+	(highestScore = rollvalue ) ifTrue:  [ self removeFromJail: self currentTurnPlayer  ] ifFalse:  [ Error signal: 'The plsyer is in jail']
+]
+
 { #category : #'private - validations' }
 BigTalkGame >> assertPlayerIsNotInJail: aPlayer [
 
