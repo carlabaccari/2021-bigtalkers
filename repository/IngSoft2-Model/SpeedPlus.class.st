@@ -7,7 +7,8 @@ Class {
 { #category : #'private - validations' }
 SpeedPlus >> applyOn: aGame to: target [
 
-	aGame applySpeedUpToASlotFrom: target
+	aGame addActiveCard: self on: target .
+	aGame applySpeedPlusToASlotFrom: target
 	
 	
 ]
@@ -15,7 +16,7 @@ SpeedPlus >> applyOn: aGame to: target [
 { #category : #accessing }
 SpeedPlus >> effect [
 
-	^ 4
+	^0
 ]
 
 { #category : #'private - validations' }
@@ -23,4 +24,10 @@ SpeedPlus >> playableBy: aPlayer on: aGame affecting: target [
 
 	aGame currentTurnPlayer  ~= aPlayer ifTrue: [ Error
 				signal: 'Players can only play permanent cards during their turn' ].
+]
+
+{ #category : #accessing }
+SpeedPlus >> temporaryEffect [
+
+	^4
 ]

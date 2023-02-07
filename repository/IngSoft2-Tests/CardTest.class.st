@@ -108,9 +108,10 @@ CardTest >> testAGameWithACancellationAndNoActiveCards [
 { #category : #tests }
 CardTest >> testAGameWithALibertyCardThatFallsInJail [
 
-	| aGame aDie aBoard aDice  someSlots |
+	| aGame aDie aBoard aDice  someSlots rollValues |
 	player1 drawCardFrom: libertyDeck.
-	aDie := LoadedDie rolling: 3.
+	rollValues := #(3 3 4) asOrderedCollection.
+	aDie := LoadedDie rolling: rollValues.
 	aDice := Dice with: {aDie}.
 	someSlots := {BoardSlot withNoEffect.
 	BoardSlot withNoEffect.
@@ -127,12 +128,12 @@ CardTest >> testAGameWithALibertyCardThatFallsInJail [
 			player2}
 		usingDice: aDice
 		playedOn: aBoard
-		finishingAtLap: 2.
+		finishingAtLap: 4.
 	aGame moveCurrentPlayer.
 	aGame moveCurrentPlayer.
 	aGame libertyCardUsedBy: player1 targetting: player1.
 	aGame moveCurrentPlayer.
-	self assert: (aGame currentSlotOf: player1) equals: 6. "el jugador 1 usa la carta libertad y sale de la carcel"
+	self assert: (aGame currentSlotOf: player1) equals: 7. "el jugador 1 usa la carta libertad y sale de la carcel"
 	self
 		should: [ aGame  moveCurrentPlayer.]
 		raise: Error
@@ -204,9 +205,7 @@ CardTest >> testAGameWithASpeedPlusCard [
 	aGame moveCurrentPlayer. "player 1 - 3 "
 	aGame moveCurrentPlayer. "player 2 - 3"
 	currentPosition := aGame currentSlotOf: player1.
-	"(currentSlotOf: player1) temporaryEffects equals: 0)."
-	"self assert: ( aGame currentSlotOf: player1 ) equals: 3."
-	aGame speedPlusCardUsedBy: player1. "se aplica sobre el casillero en el que esta?"
+	aGame speedPlusCardUsedBy: player1. 
 	self assert: ((aBoard slotAt: 3 ) temporaryEffects) equals: 4.
 	self assert: ( aGame currentSlotOf: player2 ) equals: 3.
 	aGame moveCurrentPlayer. "player 1 - 6"
@@ -216,6 +215,66 @@ CardTest >> testAGameWithASpeedPlusCard [
 	self assert: ( aGame currentSlotOf: player2 ) equals: 6.
 	aGame moveCurrentPlayer.
 	self assert: ( aGame currentSlotOf: player1 ) equals: 1.
+	
+
+	
+]
+
+{ #category : #tests }
+CardTest >> testAGameWithASpeedPlusCardAndCancellation [
+
+	| aGame aDie aBoard aDice |
+	player1 drawCardFrom: speedPlusDeck.
+	player1 drawCardFrom: cancellationDeck.
+	aDie := LoadedDie rolling: 3.
+	aDice := Dice with: {aDie}.
+	aBoard := Board sizedWithNoEffects: 6.
+	aGame := BigTalkGame
+		playedBy:
+			{player1.
+			player2}
+		usingDice: aDice
+		playedOn: aBoard
+		finishingAtLap: 3.
+	aGame  moveCurrentPlayer.
+	self assert: (aGame currentSlotOf: player1 ) equals: 3.
+	aGame moveCurrentPlayer.
+	aGame speedPlusCardUsedBy: player1. 
+	self assert: ((aBoard slotAt: 3 ) temporaryEffects) equals: 4.
+	aGame moveCurrentPlayer. 
+	self assert: (aGame currentSlotOf: player1 ) equals: 6.
+	aGame moveCurrentPlayer.
+	aGame moveCurrentPlayer.
+	self assert: (aGame currentSlotOf: player1 ) equals: 1.
+	aGame moveCurrentPlayer.
+	aGame cancellationCardUsedBy: player1 targetting: player1 removing: speedPlusCard.
+	self assert: ((aBoard slotAt: 3 ) temporaryEffects) equals: 0.
+	
+	
+	
+]
+
+{ #category : #tests }
+CardTest >> testAGameWithASpeedPlusCardThatCannotPlay [
+
+	| aGame aDie aBoard aDice |
+	player1 drawCardFrom: speedPlusDeck.
+	aDie := LoadedDie rolling: 3.
+	aDice := Dice with: {aDie}.
+	aBoard := Board sizedWithNoEffects: 6.
+	aGame := BigTalkGame
+		playedBy:
+			{player1.
+			player2}
+		usingDice: aDice
+		playedOn: aBoard
+		finishingAtLap: 4.
+	 
+	self
+		should: [aGame speedPlusCardUsedBy: player1. ]
+		raise: Error
+		withMessage: 'Players must be in a slot to play SpeedPlus card'.
+	
 	
 
 	

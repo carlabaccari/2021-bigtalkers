@@ -13,7 +13,8 @@ Class {
 		'lastCardUsed',
 		'lastEffect',
 		'deck',
-		'playersInJail'
+		'playersInJail',
+		'slotsWithTemporaryEffects'
 	],
 	#category : #'IngSoft2-Model'
 }
@@ -92,14 +93,6 @@ BigTalkGame >> addEffectTo: aSlot [
 	
 ]
 
-{ #category : #'accessing - game' }
-BigTalkGame >> addSpeedPlusEffectTo: aSlot [
-
-	aSlot addSpeedPlusEffect.
-
-
-]
-
 { #category : #'effect-application' }
 BigTalkGame >> applyAtomicBombTo: aPlayer [
 
@@ -143,10 +136,17 @@ BigTalkGame >> applyMoonWalk: steps toPlayer: target [
 	players do: [ :player | self playerMove: player slots: steps * -1 ]
 ]
 
-{ #category : #'playing - card usage' }
+{ #category : #'effect-application' }
 BigTalkGame >> applySpeedPlusToASlotFrom: aPlayer [
+
+	| speedPlusCard currentPosition |
+	speedPlusCard := SpeedPlus new.
+	currentPosition := self currentSlotOf: aPlayer.
+	self validateTemporaryEffectApplication: currentPosition.
+	(board slotAt: currentPosition) addTemporaryEffect: speedPlusCard temporaryEffect.
+	slotsWithTemporaryEffects add: currentPosition 
 	
-	self addSpeedPlusEffectTo: (self currentSlotOf: aPlayer)
+
 	
 ]
 
@@ -156,19 +156,7 @@ BigTalkGame >> applySpeedUpTo: aPlayer [
 	self playerMove: aPlayer slots: 4
 ]
 
-{ #category : #private }
-BigTalkGame >> applySpeedUpToASlotFrom: aPlayer [
-
-	| speedPlusCard currentPosition |
-	speedPlusCard := SpeedPlus new.
-	currentPosition := self currentSlotOf: aPlayer.
-	(board slotAt: currentPosition) addTemporaryEffect: speedPlusCard effect.
-	
-
-	
-]
-
-{ #category : #'playing - card usage' }
+{ #category : #'effect-application' }
 BigTalkGame >> applyTemporaryEffectTo: aPlayer [
 	
 	
@@ -191,22 +179,13 @@ BigTalkGame >> assertGameIsNotFinished [
 	self hasFinished ifTrue: [ Error signal: 'The game has finished' ]
 ]
 
-{ #category : #'playing - card usage' }
+{ #category : #'private - validations' }
 BigTalkGame >> assertPlayerGotTheHighestScore: rollValue [
 
 	| highestScore  diceCollection |
 	diceCollection := dice dice.
 	highestScore := diceCollection sum: [ :die | die sides ].
 	(highestScore = rollValue ) ifTrue:  [ self removeFromJail: self currentTurnPlayer  ] ifFalse:  [ Error signal: 'The player is in jail']
-]
-
-{ #category : #'private - validations' }
-BigTalkGame >> assertPlayerIsNotInJail: aPlayer [
-
-	( self isInJail: aPlayer )   ifTrue: [ Error signal: 'The player is in jail' ]
-	
-	
-
 ]
 
 { #category : #'private - validations' }
@@ -281,9 +260,10 @@ BigTalkGame >> initializeWithPlayers: somePlayers withDice: someDice withBoard: 
 	turn nextPutAll: players.
 	currentPlayer := turn next.
 	playersInJail := OrderedCollection new.
+	slotsWithTemporaryEffects := OrderedCollection new.
 ]
 
-{ #category : #private }
+{ #category : #'accesing - player' }
 BigTalkGame >> isInJail: aPlayer [
 
 	^ (playersInJail includes: aPlayer)
@@ -398,9 +378,12 @@ self player: aPlayer usesCard: Redo new  on: target.
 { #category : #'effect-application' }
 BigTalkGame >> removeActiveCard: aCard from: target [
 
+	| slotToRemoveEffect |
 	activeCards remove: aCard from: target.
-	aCard = SpeedPlus new
-		ifTrue:  [ (board slotAt: (self currentSlotOf: target)) addTemporaryEffect: 0]
+	aCard = SpeedPlus new ifTrue: [ 
+		slotToRemoveEffect := slotsWithTemporaryEffects at: 1.
+		(board slotAt: slotToRemoveEffect) addTemporaryEffect: 0.
+		slotsWithTemporaryEffects remove: slotToRemoveEffect ]
 ]
 
 { #category : #'effect-application' }
@@ -424,13 +407,7 @@ self player: aPlayer usesCard: Speed new  on: target.
 { #category : #'playing - card usage' }
 BigTalkGame >> speedPlusCardUsedBy: aPlayer [ 
 
-self player: aPlayer usesCard: SpeedPlus new  on: aPlayer.
-]
-
-{ #category : #'playing - card usage' }
-BigTalkGame >> speedPlusCardUsedBy: aPlayer toSlot: aNumber [
-
-self player: aPlayer usesCard: SpeedPlus new  on: aPlayer.
+self player: aPlayer usesCard: SpeedPlus new on: aPlayer.
 ]
 
 { #category : #'private - validations' }
@@ -442,7 +419,7 @@ BigTalkGame >> validatePlayabilityOn: aCard by: aPlayer affecting: target [
 { #category : #'private - validations' }
 BigTalkGame >> validateTemporaryEffectApplication: aPosition [
 
-	 ( aPosition = 0 ) ifTrue: [ Error signal: 'Players must be in a slot to play SpeedUp card' ]
+	 ( aPosition = 0 ) ifTrue: [ Error signal: 'Players must be in a slot to play SpeedPlus card' ]
 	
 
 	
