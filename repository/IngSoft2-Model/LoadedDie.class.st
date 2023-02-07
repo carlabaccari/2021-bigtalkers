@@ -10,7 +10,7 @@ Class {
 { #category : #'instance creation' }
 LoadedDie class >> rolling: anExpectedRoll [
 
-	self validate: anExpectedRoll.
+	(anExpectedRoll isNumber) ifTrue: [self validate: anExpectedRoll ].
 	^ self new initializeWith: anExpectedRoll
 ]
 
@@ -30,18 +30,36 @@ LoadedDie class >> validateLoadedDieCannotHaveNegativeResult: anExpectedRoll [
 
 { #category : #initialization }
 LoadedDie >> initializeWith: anExpectedRoll [
+
+	anExpectedRoll isNumber
+		ifTrue: [ rollValue := anExpectedRoll. ]
+		ifFalse: [ rollValue := OrderedCollection new.
+			anExpectedRoll do: [:value | rollValue add: value  ] ]
+		
 	
-	rollValue := anExpectedRoll.
+	
+	
 ]
 
 { #category : #rolling }
 LoadedDie >> roll [
 
-	^ rollValue
+	| roll |
+	rollValue isCollection
+		ifTrue: [ 
+			roll := rollValue at: 1.
+			rollValue remove: roll.
+			rollValue add: roll ]
+		ifFalse: [ roll := rollValue ].
+	^ roll
 ]
 
 { #category : #rolling }
 LoadedDie >> sides [
 
-	^ rollValue
+	| sides |
+	rollValue isCollection
+		ifTrue: [ sides := rollValue max ]
+		ifFalse: [ sides := rollValue ].
+	^ sides
 ]

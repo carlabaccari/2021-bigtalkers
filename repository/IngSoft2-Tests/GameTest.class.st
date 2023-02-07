@@ -409,14 +409,52 @@ GameTest >> testGamePlayerOneFallsInAtomicBomb [
 ]
 
 { #category : #tests }
-GameTest >> testGamePlayerOneFallsInJail [
+GameTest >> testGamePlayerOneFallsInJailAndCannotGetOut [
 
-	| aDie aDice aBoard aGame slots |
-	aDie := LoadedDie rolling: 3.
+	|  aDice aBoard aGame slots rollValues |
+	rollValues := #(2 4 5) asOrderedCollection. 
+	aDice := Dice with: {LoadedDie  rolling:  rollValues}.
+	slots := {BoardSlot withNoEffect.
+	BoardSlot withJail.
+	BoardSlot withNoEffect.
+	BoardSlot withNoEffect.
+	BoardSlot withNoEffect.
+	BoardSlot withNoEffect.
+	BoardSlot withNoEffect.
+	BoardSlot withNoEffect.} .
+	aBoard := Board withAll: slots.
+	aGame := BigTalkGame
+		playedBy:
+			{player1.
+			player2}
+		usingDice: aDice
+		playedOn: aBoard
+		finishingAtLap: 5.
+	aGame moveCurrentPlayer. 
+	aGame moveCurrentPlayer. 
+	aGame moveCurrentPlayer.
+
+	self
+		should: [ aGame  moveCurrentPlayer.]
+		raise: Error
+		withMessage: 'The player is in jail'
+
+
+]
+
+{ #category : #tests }
+GameTest >> testGamePlayerOneFallsInJailAndGetsOutWithHighestScore [
+
+	| aDie aDice aBoard aGame slots rollValues |
+	rollValues := #(1 3 6) asOrderedCollection. 
+	aDie := LoadedDie rolling: rollValues.
 	aDice := Dice with: {aDie}.
 	slots := {BoardSlot withNoEffect.
 	BoardSlot withNoEffect.
 	BoardSlot withJail.
+	BoardSlot withNoEffect.
+	BoardSlot withNoEffect.
+	BoardSlot withNoEffect.
 	BoardSlot withNoEffect}.
 	aBoard := Board withAll: slots.
 	aGame := BigTalkGame
@@ -427,12 +465,13 @@ GameTest >> testGamePlayerOneFallsInJail [
 		playedOn: aBoard
 		finishingAtLap: 3.
 	aGame moveCurrentPlayer. "se mueve el primer jugador al casillero tres"
+	self assert: (aGame currentSlotOf: player1) equals: 3.
 	aGame moveCurrentPlayer. "Se mueve el segundo jugador al casillero tres"
-		
-	self
-		should: [ aGame  moveCurrentPlayer.]
-		raise: Error
-		withMessage: 'The player is in jail'
+	aGame moveCurrentPlayer.
+	self assert: (aGame currentSlotOf: player1) equals: 2.
+	
+	aGame moveCurrentPlayer.
+	self assert: (aGame currentSlotOf: player2 ) equals: 4.
 
 
 ]

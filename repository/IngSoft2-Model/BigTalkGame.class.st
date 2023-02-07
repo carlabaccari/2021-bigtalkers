@@ -192,18 +192,29 @@ BigTalkGame >> assertGameIsNotFinished [
 ]
 
 { #category : #'playing - card usage' }
-BigTalkGame >> assertPlayerGotTheHighestScore: someDice [
+BigTalkGame >> assertPlayerGotTheHighestScore: rollValue [
 
-	| highestScore rollvalue |
-	highestScore := someDice sum: [ :die | die sides ].
-	rollvalue := dice roll.
-	(highestScore = rollvalue ) ifTrue:  [ self removeFromJail: self currentTurnPlayer  ] ifFalse:  [ Error signal: 'The player is in jail']
+	| highestScore  diceCollection |
+	diceCollection := dice dice.
+	highestScore := diceCollection sum: [ :die | die sides ].
+	(highestScore = rollValue ) ifTrue:  [ self removeFromJail: self currentTurnPlayer  ] ifFalse:  [ Error signal: 'The player is in jail']
 ]
 
 { #category : #'private - validations' }
 BigTalkGame >> assertPlayerIsNotInJail: aPlayer [
 
 	( self isInJail: aPlayer )   ifTrue: [ Error signal: 'The player is in jail' ]
+	
+	
+
+]
+
+{ #category : #'private - validations' }
+BigTalkGame >> assertPlayerIsNotInJail: aPlayer withRollValue: aRollValue [
+
+
+	( self isInJail: aPlayer )   ifTrue: [ self assertPlayerGotTheHighestScore: aRollValue  ]
+
 	
 	
 
@@ -310,7 +321,7 @@ self player: aPlayer usesCard: Liberty new  on: target.
 BigTalkGame >> moveCurrentPlayer [
 
 	self assertGameIsNotFinished.
-	self assertPlayerIsNotInJail: self currentTurnPlayer. 
+	"self assertPlayerIsNotInJail: self currentTurnPlayer. "
 	self playerMoveAfterRoll: self currentTurnPlayer.
 	lastEffect := self applyCurrentEffect.
 	self applyTemporaryEffectTo: self currentTurnPlayer.
@@ -343,10 +354,12 @@ BigTalkGame >> playerMove: aPlayer slots: aNumberOfSlots [
 { #category : #private }
 BigTalkGame >> playerMoveAfterRoll: aPlayer [
 
-	| rollvalue modifier |
+	| rollvalue modifier finalRollValue |
 	modifier := activeCards playerRollModifier: aPlayer.
-	rollvalue := dice roll + modifier.
-	board movePlayer: aPlayer to: rollvalue
+	rollvalue := dice roll.
+	self assertPlayerIsNotInJail: self currentTurnPlayer withRollValue: rollvalue.
+	finalRollValue := rollvalue + modifier.
+	board movePlayer: aPlayer to: finalRollValue 
 ]
 
 { #category : #private }

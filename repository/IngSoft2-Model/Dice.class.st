@@ -27,6 +27,12 @@ Dice class >> with: someDice [
 	^ self new initializeWith: someDice
 ]
 
+{ #category : #rolling }
+Dice >> dice [
+
+	^dice 
+]
+
 { #category : #initialization }
 Dice >> initializeWith: aDiceCollection [
 
