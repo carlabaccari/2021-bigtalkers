@@ -86,6 +86,20 @@ BigTalkGame >> addActiveCard: aCard on: target [
 		ifFalse: [ activeCards add: aCard to: target ]
 ]
 
+{ #category : #'accessing - game' }
+BigTalkGame >> addEffectTo: aSlot [
+
+	
+]
+
+{ #category : #'accessing - game' }
+BigTalkGame >> addSpeedPlusEffectTo: aSlot [
+
+	aSlot addSpeedPlusEffect.
+
+
+]
+
 { #category : #'effect-application' }
 BigTalkGame >> applyAtomicBombTo: aPlayer [
 
@@ -129,10 +143,40 @@ BigTalkGame >> applyMoonWalk: steps toPlayer: target [
 	players do: [ :player | self playerMove: player slots: steps * -1 ]
 ]
 
+{ #category : #'playing - card usage' }
+BigTalkGame >> applySpeedPlusToASlotFrom: aPlayer [
+	
+	self addSpeedPlusEffectTo: (self currentSlotOf: aPlayer)
+	
+]
+
 { #category : #'effect-application' }
 BigTalkGame >> applySpeedUpTo: aPlayer [
 
 	self playerMove: aPlayer slots: 4
+]
+
+{ #category : #private }
+BigTalkGame >> applySpeedUpToASlotFrom: aPlayer [
+
+	| speedPlusCard currentPosition |
+	speedPlusCard := SpeedPlus new.
+	currentPosition := self currentSlotOf: aPlayer.
+	(board slotAt: currentPosition) addTemporaryEffect: speedPlusCard effect.
+	
+
+	
+]
+
+{ #category : #'playing - card usage' }
+BigTalkGame >> applyTemporaryEffectTo: aPlayer [
+	
+	
+	| currentPosition  |
+	currentPosition := self currentSlotOf: aPlayer.
+	(currentPosition  = 0) ifFalse: [self playerMove: aPlayer slots: (board slotAt: currentPosition) temporaryEffects ]
+	
+
 ]
 
 { #category : #'effect-application' }
@@ -153,7 +197,7 @@ BigTalkGame >> assertPlayerGotTheHighestScore: someDice [
 	| highestScore rollvalue |
 	highestScore := someDice sum: [ :die | die sides ].
 	rollvalue := dice roll.
-	(highestScore = rollvalue ) ifTrue:  [ self removeFromJail: self currentTurnPlayer  ] ifFalse:  [ Error signal: 'The plsyer is in jail']
+	(highestScore = rollvalue ) ifTrue:  [ self removeFromJail: self currentTurnPlayer  ] ifFalse:  [ Error signal: 'The player is in jail']
 ]
 
 { #category : #'private - validations' }
@@ -269,6 +313,7 @@ BigTalkGame >> moveCurrentPlayer [
 	self assertPlayerIsNotInJail: self currentTurnPlayer. 
 	self playerMoveAfterRoll: self currentTurnPlayer.
 	lastEffect := self applyCurrentEffect.
+	self applyTemporaryEffectTo: self currentTurnPlayer.
 	self changeTurn.
 	scoreboard update: board playerPositions
 ]
@@ -340,7 +385,9 @@ self player: aPlayer usesCard: Redo new  on: target.
 { #category : #'effect-application' }
 BigTalkGame >> removeActiveCard: aCard from: target [
 
-	activeCards remove: aCard from: target
+	activeCards remove: aCard from: target.
+	aCard = SpeedPlus new
+		ifTrue:  [ (board slotAt: (self currentSlotOf: target)) addTemporaryEffect: 0]
 ]
 
 { #category : #'effect-application' }
@@ -361,8 +408,29 @@ BigTalkGame >> speedCardUsedBy: aPlayer targetting: target [
 self player: aPlayer usesCard: Speed new  on: target.
 ]
 
+{ #category : #'playing - card usage' }
+BigTalkGame >> speedPlusCardUsedBy: aPlayer [ 
+
+self player: aPlayer usesCard: SpeedPlus new  on: aPlayer.
+]
+
+{ #category : #'playing - card usage' }
+BigTalkGame >> speedPlusCardUsedBy: aPlayer toSlot: aNumber [
+
+self player: aPlayer usesCard: SpeedPlus new  on: aPlayer.
+]
+
 { #category : #'private - validations' }
 BigTalkGame >> validatePlayabilityOn: aCard by: aPlayer affecting: target [
 
 	aCard playableBy: aPlayer on: self affecting: target 
+]
+
+{ #category : #'private - validations' }
+BigTalkGame >> validateTemporaryEffectApplication: aPosition [
+
+	 ( aPosition = 0 ) ifTrue: [ Error signal: 'Players must be in a slot to play SpeedUp card' ]
+	
+
+	
 ]

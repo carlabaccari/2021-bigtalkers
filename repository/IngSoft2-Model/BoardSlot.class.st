@@ -2,7 +2,8 @@ Class {
 	#name : #BoardSlot,
 	#superclass : #Object,
 	#instVars : [
-		'effect'
+		'effect',
+		'temporaryEffect'
 	],
 	#category : #'IngSoft2-Model'
 }
@@ -50,13 +51,33 @@ BoardSlot class >> withWormHole [
 ]
 
 { #category : #'accessing - effect' }
+BoardSlot >> addTemporaryEffect: anEffect [
+
+	temporaryEffect := anEffect 
+]
+
+{ #category : #'accessing - effect' }
 BoardSlot >> effect [
 
-	^ effect
+	^ effect 
 ]
 
 { #category : #initialization }
 BoardSlot >> initializeWith: anEffect [
 
-	effect := anEffect
+	temporaryEffect := 0.
+	effect :=  anEffect.
+	
+	
+	
+	
+]
+
+{ #category : #'accessing - effect' }
+BoardSlot >> temporaryEffects [
+
+	^ temporaryEffect 
+
+
+	
 ]

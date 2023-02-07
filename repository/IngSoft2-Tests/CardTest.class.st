@@ -18,7 +18,9 @@ Class {
 		'redoCard',
 		'cancellationCard',
 		'libertyDeck',
-		'libertyCard'
+		'libertyCard',
+		'speedPlusDeck',
+		'speedPlusCard'
 	],
 	#category : #'IngSoft2-Tests'
 }
@@ -35,8 +37,10 @@ CardTest >> setUp [
 	repeatDeck := Deck onlyRepeatCards.
 	accelerationDeck := Deck onlyAccelerationCards.
 	cancellationDeck := Deck onlyCancellationCards.
+	speedPlusDeck := Deck onlySpeedPlusCards.
 	libertyDeck := Deck onlyLibertyCards.
 	speedCard := Speed new.
+	speedPlusCard := SpeedPlus new.
 	overloadCard := Overload new.
 	accelerationCard := Acceleration new.
 	repeatCard := Repeat new.
@@ -180,6 +184,41 @@ CardTest >> testAGameWithASpeedCardAndCancellation [
 	aGame moveCurrentPlayer.
 	aLeader := aGame leaderPosition.
 	self assert: aLeader equals: 4
+]
+
+{ #category : #tests }
+CardTest >> testAGameWithASpeedPlusCard [
+
+	| aGame aDie aBoard aDice currentPosition |
+	player1 drawCardFrom: speedPlusDeck.
+	aDie := LoadedDie rolling: 3.
+	aDice := Dice with: {aDie}.
+	aBoard := Board sizedWithNoEffects: 6.
+	aGame := BigTalkGame
+		playedBy:
+			{player1.
+			player2}
+		usingDice: aDice
+		playedOn: aBoard
+		finishingAtLap: 4.
+	aGame moveCurrentPlayer. "player 1 - 3 "
+	aGame moveCurrentPlayer. "player 2 - 3"
+	currentPosition := aGame currentSlotOf: player1.
+	"(currentSlotOf: player1) temporaryEffects equals: 0)."
+	"self assert: ( aGame currentSlotOf: player1 ) equals: 3."
+	aGame speedPlusCardUsedBy: player1. "se aplica sobre el casillero en el que esta?"
+	self assert: ((aBoard slotAt: 3 ) temporaryEffects) equals: 4.
+	self assert: ( aGame currentSlotOf: player2 ) equals: 3.
+	aGame moveCurrentPlayer. "player 1 - 6"
+	aGame moveCurrentPlayer. "player 2 - 6"
+	aGame moveCurrentPlayer. "pLayer 1 - 3 + 4 --> 1 lap 3"
+	self assert: ( aGame currentSlotOf: player1 ) equals: 1.
+	self assert: ( aGame currentSlotOf: player2 ) equals: 6.
+	aGame moveCurrentPlayer.
+	self assert: ( aGame currentSlotOf: player1 ) equals: 1.
+	
+
+	
 ]
 
 { #category : #tests }

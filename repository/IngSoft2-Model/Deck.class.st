@@ -63,6 +63,12 @@ Deck class >> onlySpeedCards [
 ]
 
 { #category : #'instance creation' }
+Deck class >> onlySpeedPlusCards [
+
+	^ self new initializeWith: {SpeedPlus new}
+]
+
+{ #category : #'instance creation' }
 Deck class >> using: cardTypes [
 
 	^ self new initializeWith: cardTypes
